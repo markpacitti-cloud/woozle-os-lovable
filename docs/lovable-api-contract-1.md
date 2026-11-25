@@ -227,6 +227,11 @@ Response (every action except `list`):
   502 assistant unavailable. `error` holds a message to show.
 - A reply can take 10–60 seconds: show a typing indicator, and keep the input disabled until the reply arrives.
 
+Tools the assistant can use (generated from the shared tool set; it always acts as the signed-in person):
+- Read, run straight away: `whoami` (Who am I), `search_companies` (Search companies), `get_company` (Get company), `search_people` (Search people (contacts)), `get_person` (Get person (contact)), `list_deals` (List deals), `get_deal` (Get deal), `list_tasks` (List tasks), `search_emails` (Search emails), `get_email_thread` (Get email thread), `list_meetings` (List my meetings), `list_insights` (List insights (blog posts)), `get_insight` (Get insight (blog post)).
+- Change, shown as a pending action card first (nothing changes until Approve): `create_deal` (Create deal), `update_deal` (Update deal), `create_person` (Create person (contact)), `update_person` (Update person (contact)), `create_company` (Create company), `update_company` (Update company), `set_company_owner` (Set company owner), `add_note` (Add note), `update_note` (Edit note), `create_task` (Create task), `complete_task` (Complete task), `draft_insight` (Draft insight (blog post)).
+- No tool deletes or archives. A change the person may not make is refused by the database; the reply says so.
+
 ### `marketing-upload` (POST)
 
 ```ts
@@ -263,3 +268,5 @@ Stored emails and meetings stay. Errors: 401 / 403 as above.
 
 **Not for the browser:** `public-content` (the website's feed), `nylas-callback`, `nylas-webhook`,
 `nylas-sync`, `nylas-worker`, `fx-rates-sync`, `mcp`. Don't call them.
+
+<!-- Generated from the Woozle staging database by scripts/sync-lovable-contract.ps1 (woozle-crm). Edit docs/lovable-contract/ there, not this file. -->
