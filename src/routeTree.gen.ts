@@ -10,33 +10,102 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SectionRouteImport } from './routes/$section'
+import { Route as AdminSectionRouteImport } from './routes/admin.$section'
+import { Route as CompaniesIndexRouteImport } from './routes/companies.index'
+import { Route as CompaniesCompanyIdRouteImport } from './routes/companies.$companyId'
+import { Route as MarketingSectionRouteImport } from './routes/marketing.$section'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SectionRoute = SectionRouteImport.update({
+  id: '/$section',
+  path: '/$section',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSectionRoute = AdminSectionRouteImport.update({
+  id: '/admin/$section',
+  path: '/admin/$section',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompaniesIndexRoute = CompaniesIndexRouteImport.update({
+  id: '/companies/',
+  path: '/companies/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompaniesCompanyIdRoute = CompaniesCompanyIdRouteImport.update({
+  id: '/companies/$companyId',
+  path: '/companies/$companyId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketingSectionRoute = MarketingSectionRouteImport.update({
+  id: '/marketing/$section',
+  path: '/marketing/$section',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$section': typeof SectionRoute
+  '/admin/$section': typeof AdminSectionRoute
+  '/companies/$companyId': typeof CompaniesCompanyIdRoute
+  '/marketing/$section': typeof MarketingSectionRoute
+  '/companies/': typeof CompaniesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$section': typeof SectionRoute
+  '/admin/$section': typeof AdminSectionRoute
+  '/companies/$companyId': typeof CompaniesCompanyIdRoute
+  '/marketing/$section': typeof MarketingSectionRoute
+  '/companies': typeof CompaniesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$section': typeof SectionRoute
+  '/admin/$section': typeof AdminSectionRoute
+  '/companies/$companyId': typeof CompaniesCompanyIdRoute
+  '/marketing/$section': typeof MarketingSectionRoute
+  '/companies/': typeof CompaniesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/$section'
+    | '/admin/$section'
+    | '/companies/$companyId'
+    | '/marketing/$section'
+    | '/companies/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/$section'
+    | '/admin/$section'
+    | '/companies/$companyId'
+    | '/marketing/$section'
+    | '/companies'
+  id:
+    | '__root__'
+    | '/'
+    | '/$section'
+    | '/admin/$section'
+    | '/companies/$companyId'
+    | '/marketing/$section'
+    | '/companies/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SectionRoute: typeof SectionRoute
+  AdminSectionRoute: typeof AdminSectionRoute
+  CompaniesCompanyIdRoute: typeof CompaniesCompanyIdRoute
+  MarketingSectionRoute: typeof MarketingSectionRoute
+  CompaniesIndexRoute: typeof CompaniesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +117,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$section': {
+      id: '/$section'
+      path: '/$section'
+      fullPath: '/$section'
+      preLoaderRoute: typeof SectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/$section': {
+      id: '/admin/$section'
+      path: '/admin/$section'
+      fullPath: '/admin/$section'
+      preLoaderRoute: typeof AdminSectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/companies/': {
+      id: '/companies/'
+      path: '/companies'
+      fullPath: '/companies/'
+      preLoaderRoute: typeof CompaniesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/companies/$companyId': {
+      id: '/companies/$companyId'
+      path: '/companies/$companyId'
+      fullPath: '/companies/$companyId'
+      preLoaderRoute: typeof CompaniesCompanyIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marketing/$section': {
+      id: '/marketing/$section'
+      path: '/marketing/$section'
+      fullPath: '/marketing/$section'
+      preLoaderRoute: typeof MarketingSectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SectionRoute: SectionRoute,
+  AdminSectionRoute: AdminSectionRoute,
+  CompaniesCompanyIdRoute: CompaniesCompanyIdRoute,
+  MarketingSectionRoute: MarketingSectionRoute,
+  CompaniesIndexRoute: CompaniesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project architecture rules
+
+- **Staging Supabase API contract.** Connect directly to the external staging Supabase project in `src/lib/supabase.ts` via `@supabase/supabase-js` and route every read (`from`) and write (`rpc`) through `supabase.schema("api")`; do not enable Lovable Cloud, the Lovable Supabase integration, Lovable AI, or local SQL because the staging database owns all views, RPCs, RLS, and edge functions.
+- **Staff shell and spaces.** Wrap `<Outlet />` in `AuthProvider`, `AuthGate`, and `AppShell` in `src/routes/__root.tsx`, deriving the active space from the URL (`/marketing/*`, `/admin/*`, else Sales) and rendering unbuilt sections through `$section` routes so every page shares authentication, navigation, global search, and the Ask Woozle panel.
