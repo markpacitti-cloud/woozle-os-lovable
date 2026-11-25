@@ -88,7 +88,7 @@ export const SPACE_NAV: Record<SpaceId, NavGroupConfig[]> = {
           requires: (access) => Boolean(access?.deals_view || access?.is_global_admin),
         },
         { label: "Companies", path: "/companies", icon: "companies", implemented: true },
-        { label: "People", path: "/people", icon: "people" },
+        { label: "People", path: "/people", icon: "people", implemented: true },
         { label: "Meetings", path: "/meetings", icon: "meetings" },
       ],
     },
@@ -152,7 +152,6 @@ export const SALES_SECTIONS = new Set([
   "inbox",
   "tasks",
   "deals",
-  "people",
   "meetings",
   "signals",
   "outreach",
@@ -210,6 +209,8 @@ export function getVisibleGroups(space: SpaceId, access: MyAccess | null): NavGr
 export function getPageLabelForPath(pathname: string): string {
   if (pathname === "/" || pathname === "/companies") return "Companies";
   if (pathname.startsWith("/companies/")) return "Company";
+  if (pathname === "/people") return "People";
+  if (pathname.startsWith("/people/")) return "Person";
   for (const groups of Object.values(SPACE_NAV)) {
     for (const group of groups) {
       for (const item of group.items) {

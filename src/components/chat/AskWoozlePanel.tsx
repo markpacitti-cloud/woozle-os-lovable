@@ -10,6 +10,7 @@ import {
   Loader2,
   Plus,
   Sparkles,
+  User,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -41,10 +42,19 @@ interface AskWoozlePanelProps {
   space: SpaceId;
   companyId?: string | undefined;
   companyName?: string | undefined;
+  personId?: string | undefined;
+  personName?: string | undefined;
   onClose: () => void;
 }
 
-export function AskWoozlePanel({ space, companyId, companyName, onClose }: AskWoozlePanelProps) {
+export function AskWoozlePanel({
+  space,
+  companyId,
+  companyName,
+  personId,
+  personName,
+  onClose,
+}: AskWoozlePanelProps) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -75,6 +85,15 @@ export function AskWoozlePanel({ space, companyId, companyName, onClose }: AskWo
       }
       if (path === "/companies") {
         void navigate({ to: "/companies" });
+        return;
+      }
+      const personMatch = /^\/people\/([^/]+)$/.exec(path);
+      if (personMatch && personMatch[1]) {
+        void navigate({ to: "/people/$personId", params: { personId: personMatch[1] } });
+        return;
+      }
+      if (path === "/people") {
+        void navigate({ to: "/people" });
         return;
       }
       const marketingMatch = /^\/marketing\/([^/]+)$/.exec(path);
@@ -176,6 +195,8 @@ export function AskWoozlePanel({ space, companyId, companyName, onClose }: AskWo
     };
     if (companyId) {
       body["context"] = { page: "company", record_id: companyId };
+    } else if (personId) {
+      body["context"] = { page: "person", record_id: personId };
     }
 
     const { data, error } = await supabase.functions.invoke<AiChatResponse>("ai-chat", { body });
@@ -223,8 +244,19 @@ export function AskWoozlePanel({ space, companyId, companyName, onClose }: AskWo
     if (decision === "approve") {
       toast.success("Change approved");
       await queryClient.invalidateQueries({ queryKey: ["companies"] });
+      await queryClient.invalidateQueries({ queryKey: ["people"] });
       if (companyId) {
         await queryClient.invalidateQueries({ queryKey: ["company", companyId] });
+        await queryClient.invalidateQueries({ queryKey: ["company-people", companyId] });
+      }
+      if (personId) {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ["person", personId] }),
+          queryClient.invalidateQueries({ queryKey: ["person-emails", personId] }),
+          queryClient.invalidateQueries({ queryKey: ["person-roles", personId] }),
+          queryClient.invalidateQueries({ queryKey: ["person-deals", personId] }),
+          queryClient.invalidateQueries({ queryKey: ["person-activity", personId] }),
+        ]);
       }
     } else {
       toast.success("Change rejected");
@@ -312,6 +344,11 @@ export function AskWoozlePanel({ space, companyId, companyName, onClose }: AskWo
           <Building2 className="h-3.5 w-3.5 shrink-0 text-link" />
           <span className="truncate">Context: {companyName || "Current company"}</span>
         </div>
+      ) : personId ? (
+        <div className="flex items-center gap-1.5 border-b border-border bg-surface-subtle px-3 py-1.5 text-xs text-muted-foreground">
+          <User className="h-3.5 w-3.5 shrink-0 text-link" />
+          <span className="truncate">Context: {personName || "Current person"}</span>
+        </div>
       ) : null}
 
       <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
@@ -326,7 +363,9 @@ export function AskWoozlePanel({ space, companyId, companyName, onClose }: AskWo
             <p className="mt-1">
               {companyId
                 ? "Questions will include this company automatically. Any suggested edits require your approval."
-                : "Search companies, review deals, or draft updates. Nothing changes until you approve."}
+                : personId
+                  ? "Questions will include this person automatically. Any suggested edits require your approval."
+                  : "Search companies, people, review deals, or draft updates. Nothing changes until you approve."}
             </p>
           </div>
         ) : (
@@ -404,7 +443,13 @@ export function AskWoozlePanel({ space, companyId, companyName, onClose }: AskWo
                 void sendMessage();
               }
             }}
-            placeholder={companyId ? "Ask about this company…" : "Ask Woozle…"}
+            placeholder={
+              companyId
+                ? "Ask about this company…"
+                : personId
+                  ? "Ask about this person…"
+                  : "Ask Woozle…"
+            }
             rows={2}
             className="min-h-[64px] resize-none bg-surface-subtle pr-10 text-xs"
           />

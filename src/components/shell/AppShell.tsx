@@ -53,7 +53,7 @@ import {
   getVisibleGroups,
   type NavItemConfig,
 } from "@/lib/navigation";
-import type { CompanyDetail } from "@/lib/types";
+import type { CompanyDetail, PersonListItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 function NavIcon({ name, className }: { name: NavItemConfig["icon"]; className?: string }) {
@@ -123,13 +123,24 @@ export function AppShell({ children }: { children: ReactNode }) {
     enabled: false,
   });
 
+  const personMatch = useMatch({ from: "/people/$personId", shouldThrow: false });
+  const personId = personMatch?.params.personId;
+  const { data: cachedPerson } = useQuery<PersonListItem | null>({
+    queryKey: ["person", personId],
+    queryFn: () =>
+      personId ? (queryClient.getQueryData<PersonListItem>(["person", personId]) ?? null) : null,
+    enabled: false,
+  });
+
   const currentSpaceId = getSpaceFromPath(location.pathname);
   const currentSpace = SPACES[currentSpaceId];
   const availableSpaces = getAvailableSpaces(access);
   const navGroups = getVisibleGroups(currentSpaceId, access);
   const pageLabel = companyId
     ? (cachedCompany?.name ?? "Company")
-    : getPageLabelForPath(location.pathname);
+    : personId
+      ? (cachedPerson?.full_name ?? "Person")
+      : getPageLabelForPath(location.pathname);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -154,6 +165,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       void navigate({ to: "/companies" });
       return;
     }
+    if (path === "/people") {
+      void navigate({ to: "/people" });
+      return;
+    }
     if (path.startsWith("/marketing/")) {
       void navigate({
         to: "/marketing/$section",
@@ -174,6 +189,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isActivePath = (path: string) => {
     if (path === "/companies") {
       return location.pathname === "/companies" || location.pathname.startsWith("/companies/");
+    }
+    if (path === "/people") {
+      return location.pathname === "/people" || location.pathname.startsWith("/people/");
     }
     return location.pathname === path;
   };
@@ -327,6 +345,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <span>/</span>
                 </>
               ) : null}
+              {personId ? (
+                <>
+                  <Link to="/people" className="hover:text-foreground">
+                    People
+                  </Link>
+                  <span>/</span>
+                </>
+              ) : null}
               <span className="truncate font-medium text-foreground">{pageLabel}</span>
             </div>
           </div>
@@ -467,6 +493,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                 space={currentSpaceId}
                 companyId={companyId}
                 companyName={cachedCompany?.name}
+                personId={personId}
+                personName={cachedPerson?.full_name}
                 onClose={() => setChatOpen(false)}
               />
             </div>
@@ -479,6 +507,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                 space={currentSpaceId}
                 companyId={companyId}
                 companyName={cachedCompany?.name}
+                personId={personId}
+                personName={cachedPerson?.full_name}
                 onClose={() => setMobileChatOpen(false)}
               />
             </SheetContent>

@@ -15,6 +15,8 @@ import { Route as AdminSectionRouteImport } from './routes/admin.$section'
 import { Route as CompaniesIndexRouteImport } from './routes/companies.index'
 import { Route as CompaniesCompanyIdRouteImport } from './routes/companies.$companyId'
 import { Route as MarketingSectionRouteImport } from './routes/marketing.$section'
+import { Route as PeopleIndexRouteImport } from './routes/people.index'
+import { Route as PeoplePersonIdRouteImport } from './routes/people.$personId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +48,16 @@ const MarketingSectionRoute = MarketingSectionRouteImport.update({
   path: '/marketing/$section',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PeopleIndexRoute = PeopleIndexRouteImport.update({
+  id: '/people/',
+  path: '/people/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeoplePersonIdRoute = PeoplePersonIdRouteImport.update({
+  id: '/people/$personId',
+  path: '/people/$personId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -53,7 +65,9 @@ export interface FileRoutesByFullPath {
   '/admin/$section': typeof AdminSectionRoute
   '/companies/$companyId': typeof CompaniesCompanyIdRoute
   '/marketing/$section': typeof MarketingSectionRoute
+  '/people/$personId': typeof PeoplePersonIdRoute
   '/companies/': typeof CompaniesIndexRoute
+  '/people/': typeof PeopleIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,7 +75,9 @@ export interface FileRoutesByTo {
   '/admin/$section': typeof AdminSectionRoute
   '/companies/$companyId': typeof CompaniesCompanyIdRoute
   '/marketing/$section': typeof MarketingSectionRoute
+  '/people/$personId': typeof PeoplePersonIdRoute
   '/companies': typeof CompaniesIndexRoute
+  '/people': typeof PeopleIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,7 +86,9 @@ export interface FileRoutesById {
   '/admin/$section': typeof AdminSectionRoute
   '/companies/$companyId': typeof CompaniesCompanyIdRoute
   '/marketing/$section': typeof MarketingSectionRoute
+  '/people/$personId': typeof PeoplePersonIdRoute
   '/companies/': typeof CompaniesIndexRoute
+  '/people/': typeof PeopleIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -80,7 +98,9 @@ export interface FileRouteTypes {
     | '/admin/$section'
     | '/companies/$companyId'
     | '/marketing/$section'
+    | '/people/$personId'
     | '/companies/'
+    | '/people/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -88,7 +108,9 @@ export interface FileRouteTypes {
     | '/admin/$section'
     | '/companies/$companyId'
     | '/marketing/$section'
+    | '/people/$personId'
     | '/companies'
+    | '/people'
   id:
     | '__root__'
     | '/'
@@ -96,7 +118,9 @@ export interface FileRouteTypes {
     | '/admin/$section'
     | '/companies/$companyId'
     | '/marketing/$section'
+    | '/people/$personId'
     | '/companies/'
+    | '/people/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -105,7 +129,9 @@ export interface RootRouteChildren {
   AdminSectionRoute: typeof AdminSectionRoute
   CompaniesCompanyIdRoute: typeof CompaniesCompanyIdRoute
   MarketingSectionRoute: typeof MarketingSectionRoute
+  PeoplePersonIdRoute: typeof PeoplePersonIdRoute
   CompaniesIndexRoute: typeof CompaniesIndexRoute
+  PeopleIndexRoute: typeof PeopleIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -152,6 +178,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingSectionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/people/': {
+      id: '/people/'
+      path: '/people'
+      fullPath: '/people/'
+      preLoaderRoute: typeof PeopleIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people/$personId': {
+      id: '/people/$personId'
+      path: '/people/$personId'
+      fullPath: '/people/$personId'
+      preLoaderRoute: typeof PeoplePersonIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -161,7 +201,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSectionRoute: AdminSectionRoute,
   CompaniesCompanyIdRoute: CompaniesCompanyIdRoute,
   MarketingSectionRoute: MarketingSectionRoute,
+  PeoplePersonIdRoute: PeoplePersonIdRoute,
   CompaniesIndexRoute: CompaniesIndexRoute,
+  PeopleIndexRoute: PeopleIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

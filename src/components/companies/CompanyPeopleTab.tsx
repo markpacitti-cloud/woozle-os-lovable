@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { ExternalLink, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,7 @@ import type { CompanyPerson } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export function CompanyPeopleTab({ companyId }: { companyId: string }) {
+  const navigate = useNavigate();
   const { handleApiError } = useAuth();
   const [currentOnly, setCurrentOnly] = useState(false);
 
@@ -111,15 +113,32 @@ export function CompanyPeopleTab({ companyId }: { companyId: string }) {
               rows.map((person) => {
                 const linkedinHref = toExternalHref(person.linkedin_url);
                 return (
-                  <tr key={person.role_id} className="h-[46px] hover:bg-accent/50">
+                  <tr
+                    key={person.role_id}
+                    onClick={() =>
+                      void navigate({
+                        to: "/people/$personId",
+                        params: { personId: person.person_id },
+                      })
+                    }
+                    className="h-[46px] cursor-pointer transition-colors hover:bg-accent"
+                  >
                     <td className="px-4 font-medium text-foreground">
                       <div className="flex items-center gap-1.5">
-                        <span>{person.full_name}</span>
+                        <Link
+                          to="/people/$personId"
+                          params={{ personId: person.person_id }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-foreground hover:text-link hover:underline"
+                        >
+                          {person.full_name}
+                        </Link>
                         {linkedinHref ? (
                           <a
                             href={linkedinHref}
                             target="_blank"
                             rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
                             aria-label={`${person.full_name} LinkedIn`}
                             className="text-muted-foreground hover:text-link"
                           >
@@ -136,7 +155,11 @@ export function CompanyPeopleTab({ companyId }: { companyId: string }) {
                     </td>
                     <td className="hidden px-4 text-xs text-muted-foreground md:table-cell">
                       {person.primary_email ? (
-                        <a href={`mailto:${person.primary_email}`} className="text-link hover:underline">
+                        <a
+                          href={`mailto:${person.primary_email}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-link hover:underline"
+                        >
                           {person.primary_email}
                         </a>
                       ) : (

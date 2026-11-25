@@ -170,6 +170,88 @@ export interface CompanyActivity {
   thread_or_ical_id: string | null;
 }
 
+export interface PersonListItem {
+  id: string;
+  full_name: string;
+  first_name: string | null;
+  last_name: string | null;
+  linkedin_url: string | null;
+  primary_company_id: string | null;
+  primary_company_name: string | null;
+  primary_title: string | null;
+  primary_email_id: string | null;
+  primary_email: string | null;
+  primary_email_status: string | null;
+  phone: string | null;
+  source: string | null;
+  created_at: string;
+  updated_at: string;
+  last_activity_at: string | null;
+}
+
+export interface PersonEmail {
+  id: string;
+  person_id: string;
+  email: string;
+  email_domain: string | null;
+  type: string | null;
+  status: string | null;
+  is_primary: boolean;
+  verified_at: string | null;
+  source: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EmploymentRole {
+  id: string;
+  person_id: string;
+  person_name: string | null;
+  company_id: string | null;
+  company_name: string | null;
+  title: string | null;
+  started_on: string | null;
+  ended_on: string | null;
+  is_current: boolean;
+  is_primary: boolean;
+  source: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PersonDeal {
+  person_id: string;
+  is_primary: boolean;
+  deal_id: string;
+  name: string;
+  status: "in_progress" | "won" | "lost" | string;
+  company_id: string | null;
+  company_name: string | null;
+  owner_staff_id: string | null;
+  owner_name: string | null;
+  value: number | null;
+  currency: string | null;
+  value_gbp: number | null;
+  closed_at: string | null;
+}
+
+export interface PersonActivity {
+  person_id: string;
+  kind: "email" | "meeting" | string;
+  item_id: string;
+  occurred_at: string;
+  ends_at: string | null;
+  title: string | null;
+  snippet: string | null;
+  direction: string | null;
+  from_email: string | null;
+  from_name: string | null;
+  person_address: string | null;
+  is_main_link: boolean | null;
+  mailbox_email: string | null;
+  thread_or_ical_id: string | null;
+}
+
 export interface AiChatMessage {
   role: "user" | "assistant";
   text: string;

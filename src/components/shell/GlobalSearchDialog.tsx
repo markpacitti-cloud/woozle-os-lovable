@@ -88,6 +88,10 @@ export function GlobalSearchDialog({ open, onOpenChange }: GlobalSearchDialogPro
       void navigate({ to: "/companies" });
       return;
     }
+    if (path === "/people") {
+      void navigate({ to: "/people" });
+      return;
+    }
     if (path.startsWith("/marketing/")) {
       void navigate({
         to: "/marketing/$section",

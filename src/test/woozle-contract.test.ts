@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest";
 
+import { buildPeopleSearchOrFilter } from "@/components/people/PeopleListPage";
 import {
   formatDateTime,
   formatMoney,
   parseGmailBannerFromUrl,
   parseOAuthErrorFromUrl,
 } from "@/lib/format";
-import { getAvailableSpaces, getSpaceFromPath, getVisibleGroups } from "@/lib/navigation";
+import {
+  getAvailableSpaces,
+  getPageLabelForPath,
+  getSpaceFromPath,
+  getVisibleGroups,
+} from "@/lib/navigation";
 import type { MyAccess } from "@/lib/types";
 
 const baseAccess: MyAccess = {
@@ -83,5 +89,22 @@ describe("Woozle OS contract rules", () => {
       (s) => s.id,
     );
     expect(adminSpaces).toEqual(["sales", "marketing", "admin"]);
+  });
+
+  it("builds a safe PostgREST OR search filter for people name and primary email", () => {
+    expect(buildPeopleSearchOrFilter("   ")).toBeNull();
+    expect(buildPeopleSearchOrFilter("jane@acme.com")).toBe(
+      "full_name.ilike.%jane@acme.com%,primary_email.ilike.%jane@acme.com%",
+    );
+    expect(buildPeopleSearchOrFilter("Doe, Jane (CEO)")).toBe(
+      "full_name.ilike.%Doe  Jane  CEO%,primary_email.ilike.%Doe  Jane  CEO%",
+    );
+  });
+
+  it("resolves Sales space and labels for /people routes", () => {
+    expect(getSpaceFromPath("/people")).toBe("sales");
+    expect(getSpaceFromPath("/people/123")).toBe("sales");
+    expect(getPageLabelForPath("/people")).toBe("People");
+    expect(getPageLabelForPath("/people/123")).toBe("Person");
   });
 });
