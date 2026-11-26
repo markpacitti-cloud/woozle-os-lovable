@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, LockKeyhole, Pencil, Plus, Send } from "lucide-react";
+import { ArrowLeft, LockKeyhole, Plus, Send } from "lucide-react";
 
-import { HrEmploymentEditor, HrEmploymentPay } from "@/components/hr/HrEmploymentPay";
+import { HrEmploymentPay } from "@/components/hr/HrEmploymentPay";
 import { HrNotesPanel } from "@/components/hr/HrNotesPanel";
 import { HrRequestsTable } from "@/components/hr/HrRequestsTable";
 import { HrSendDocumentDialog } from "@/components/hr/HrSendDocumentDialog";
@@ -35,7 +35,6 @@ export function HrStaffRecord({ staffId, mode }: { staffId: string; mode: "team"
   const canEdit = mode === "admin" && Boolean(access?.hr_admin_edit || access?.is_global_admin);
   const [sendOpen, setSendOpen] = useState(false);
   const [caseOpen, setCaseOpen] = useState(false);
-  const [employmentOpen, setEmploymentOpen] = useState(false);
 
   const personQuery = useQuery({
     queryKey: ["hr-staff", mode, staffId],
@@ -239,17 +238,7 @@ export function HrStaffRecord({ staffId, mode }: { staffId: string; mode: "team"
           {mode === "admin" ? (
             <>
               <TabsContent value="overview" className="mt-4">
-                <HrSection
-                  title="Overview"
-                  action={
-                    canEdit ? (
-                      <Button size="sm" variant="outline" onClick={() => setEmploymentOpen(true)}>
-                        <Pencil className="mr-1.5 h-3.5 w-3.5" />
-                        Edit employment
-                      </Button>
-                    ) : null
-                  }
-                >
+                <HrSection title="Overview">
                   <dl className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
                     <HrDetail label="Work email" value={person.work_email} />
                     <HrDetail label="Department" value={person.department} />
@@ -264,11 +253,13 @@ export function HrStaffRecord({ staffId, mode }: { staffId: string; mode: "team"
                 </HrSection>
               </TabsContent>
               <TabsContent value="pay" className="mt-4">
-                <HrSection title="Employment & pay">
-                  <div className="p-4">
-                    <HrEmploymentPay person={person} canEdit={canEdit} />
-                  </div>
-                </HrSection>
+                <HrEmploymentPay
+                  person={person}
+                  canEdit={canEdit}
+                  onEmploymentSaved={async () => {
+                    await personQuery.refetch();
+                  }}
+                />
               </TabsContent>
             </>
           ) : null}
@@ -297,16 +288,6 @@ export function HrStaffRecord({ staffId, mode }: { staffId: string; mode: "team"
         onOpenChange={setCaseOpen}
         onStarted={(caseId) => void navigate({ to: "/hr/cases/$caseId", params: { caseId } })}
       />
-      {mode === "admin" ? (
-        <HrEmploymentEditor
-          person={person}
-          open={employmentOpen}
-          onOpenChange={setEmploymentOpen}
-          onSaved={async () => {
-            await personQuery.refetch();
-          }}
-        />
-      ) : null}
     </HrPage>
   );
 }

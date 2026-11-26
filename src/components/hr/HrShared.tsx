@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
+import { formatHrStatus } from "@/lib/hr";
 import { api } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
@@ -76,7 +77,7 @@ export function HrStatusBadge({ status }: { status: string }) {
         : ["sent", "viewed", "draft"].includes(normalised)
           ? "blue"
           : "grey";
-  return <Badge variant={variant}>{status.replaceAll("_", " ")}</Badge>;
+  return <Badge variant={variant}>{formatHrStatus(status)}</Badge>;
 }
 
 export function HrEmpty({

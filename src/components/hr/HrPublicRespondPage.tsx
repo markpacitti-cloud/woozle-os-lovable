@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowDown, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { HrAnswersForm } from "@/components/hr/HrAnswersForm";
 import { HrMarkdown } from "@/components/hr/HrShared";
-import { HrSignBlock } from "@/components/hr/HrSignBlock";
+import { HrSignBlock, useScrolledToEnd } from "@/components/hr/HrSignBlock";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,11 +38,17 @@ export function HrPublicRespondPage({ token }: { token?: string | undefined }) {
   const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
   const [completedAt, setCompletedAt] = useState<string | null>(null);
+  const [signedName, setSignedName] = useState<string | null>(null);
   const query = useQuery({
     queryKey: ["hr-public-response", token],
     enabled: Boolean(token),
     retry: false,
     queryFn: () => publicRequest<HrPublicResponse>(token!),
+  });
+  const responseKind = getHrResponseKind(query.data?.response_type);
+  const { endRef, hasScrolledToEnd } = useScrolledToEnd({
+    enabled: query.data?.state === "ok" && !completedAt && responseKind === "acknowledge_and_sign",
+    resetKey: `${token ?? ""}:${query.data?.body?.length ?? 0}`,
   });
 
   const submit = async (
@@ -89,7 +95,12 @@ export function HrPublicRespondPage({ token }: { token?: string | undefined }) {
         }),
       });
       setCompletedAt(new Date().toISOString());
-      toast.success("Response recorded");
+      if (response === "acknowledge_and_sign" && typedName) setSignedName(typedName);
+      toast.success(
+        response === "acknowledge_and_sign"
+          ? "Signed. A signed copy will be emailed to you."
+          : "Response recorded",
+      );
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Response failed");
     } finally {
@@ -146,10 +157,19 @@ export function HrPublicRespondPage({ token }: { token?: string | undefined }) {
           ) : completedAt ? (
             <div className="p-10 text-center">
               <CheckCircle2 className="mx-auto h-9 w-9 text-tag-green-foreground" />
-              <h1 className="mt-4 text-xl font-semibold">Thank you, {query.data.first_name}</h1>
+              <h1 className="mt-4 text-xl font-semibold">
+                {signedName ? `Document signed — thank you, ${query.data.first_name}` : `Thank you, ${query.data.first_name}`}
+              </h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                Your response was recorded at {formatDateTime(completedAt)}.
+                {signedName
+                  ? `Signed by ${signedName} on ${formatDateTime(completedAt)}.`
+                  : `Your response was recorded at ${formatDateTime(completedAt)}.`}
               </p>
+              {signedName ? (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  A signed PDF copy has been emailed to you.
+                </p>
+              ) : null}
             </div>
           ) : (
             <>
@@ -163,7 +183,8 @@ export function HrPublicRespondPage({ token }: { token?: string | undefined }) {
               </div>
               <div className="space-y-6 px-6 py-6 sm:px-8">
                 <HrMarkdown body={query.data.body ?? ""} />
-                {getHrResponseKind(query.data.response_type) === "accept_decline" ? (
+                <div ref={endRef} aria-hidden="true" className="h-px" />
+                {responseKind === "accept_decline" ? (
                   <div className="space-y-2">
                     <Label>Optional comment</Label>
                     <Textarea
@@ -172,7 +193,7 @@ export function HrPublicRespondPage({ token }: { token?: string | undefined }) {
                     />
                   </div>
                 ) : null}
-                {getHrResponseKind(query.data.response_type) === "form" ? (
+                {responseKind === "form" ? (
                   <HrAnswersForm
                     fields={query.data.form_fields}
                     answers={answers}
@@ -182,38 +203,45 @@ export function HrPublicRespondPage({ token }: { token?: string | undefined }) {
                   />
                 ) : null}
                 <div className="flex flex-wrap gap-2 border-t border-border pt-5">
-                  {(() => {
-                    const kind = getHrResponseKind(query.data.response_type);
-                    return kind === "acknowledge_and_sign" ? (
-                      <div className="w-full">
-                        <HrSignBlock busy={busy} onSign={(name) => submit("acknowledge_and_sign", name)} />
-                      </div>
-                    ) : kind === "accept_decline" ? (
-                      <>
-                        <Button size="lg" disabled={busy} onClick={() => void submit("accept")}>
-                          Accept
-                        </Button>
-                        <Button
-                          size="lg"
-                          variant="outline"
-                          disabled={busy}
-                          onClick={() => void submit("decline")}
-                        >
-                          Decline
-                        </Button>
-                      </>
-                    ) : kind === "form" ? (
-                      <Button size="lg" disabled={busy} onClick={() => void submit("submit")}>
-                        {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}Submit form
+                  {responseKind === "acknowledge_and_sign" ? (
+                    <div className="w-full">
+                      <HrSignBlock
+                        busy={busy}
+                        hasScrolledToEnd={hasScrolledToEnd}
+                        onSign={(name) => submit("acknowledge_and_sign", name)}
+                      />
+                    </div>
+                  ) : responseKind === "accept_decline" ? (
+                    <>
+                      <Button size="lg" disabled={busy} onClick={() => void submit("accept")}>
+                        Accept
                       </Button>
-                    ) : (
-                      <p className="text-xs text-muted-foreground">
-                        No online response is required for this document.
-                      </p>
-                    );
-                  })()}
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        disabled={busy}
+                        onClick={() => void submit("decline")}
+                      >
+                        Decline
+                      </Button>
+                    </>
+                  ) : responseKind === "form" ? (
+                    <Button size="lg" disabled={busy} onClick={() => void submit("submit")}>
+                      {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}Submit form
+                    </Button>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      No online response is required for this document.
+                    </p>
+                  )}
                 </div>
               </div>
+              {responseKind === "acknowledge_and_sign" && !hasScrolledToEnd ? (
+                <div className="sticky bottom-0 flex items-center justify-center gap-1.5 border-t border-border bg-background/95 px-6 py-2.5 text-xs text-muted-foreground backdrop-blur-xs">
+                  <ArrowDown className="h-3.5 w-3.5" />
+                  Scroll to the end to continue
+                </div>
+              ) : null}
             </>
           )}
         </div>

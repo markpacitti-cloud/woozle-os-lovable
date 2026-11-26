@@ -32,6 +32,28 @@ export const HR_MERGE_FIELDS = [
 
 export type HrResponseKind = "acknowledge_and_sign" | "accept_decline" | "form" | "sign" | "none";
 
+export const HR_CONTRACT_TEMPLATE_FALLBACK = [
+  "Graduate",
+  "Analyst",
+  "Associate",
+  "Associate-Director",
+  "Director",
+] as const;
+
+export function formatHrStatus(status: string): string {
+  if (status.trim().toLowerCase() === "waiting_for_esign") return "Awaiting signature";
+  return status.replaceAll("_", " ");
+}
+
+export function maskSensitiveValue(value: string | null | undefined, visibleTrailing = 2): string {
+  if (!value) return "—";
+  const clean = value.trim();
+  if (!clean) return "—";
+  if (clean.length <= visibleTrailing) return "••••";
+  const hiddenCount = Math.max(4, clean.length - visibleTrailing);
+  return `${"•".repeat(hiddenCount)}${clean.slice(-visibleTrailing)}`;
+}
+
 export function getHrResponseKind(
   responseType: string | null | undefined,
   isEsign = false,
@@ -46,7 +68,6 @@ export function getHrResponseKind(
     return "accept_decline";
   }
   if (value === "form" || value === "payroll" || value === "payroll_form") return "form";
-  if (value === "esign" || value === "signature" || value === "sign") return "sign";
   return "none";
 }
 

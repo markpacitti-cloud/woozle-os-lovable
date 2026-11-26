@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { Search } from "lucide-react";
+import { Search, UserPlus } from "lucide-react";
 
+import { HrAddJoinerDialog } from "@/components/hr/HrAddJoinerDialog";
 import {
   HrEmpty,
   HrError,
@@ -11,6 +12,7 @@ import {
   HrPermissionMessage,
   HrStatusBadge,
 } from "@/components/hr/HrShared";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -27,6 +29,8 @@ export function HrPeoplePage() {
   const navigate = useNavigate();
   const { access, handleApiError } = useAuth();
   const canView = Boolean(access?.hr_admin_view || access?.is_global_admin);
+  const canEdit = Boolean(access?.hr_admin_edit || access?.is_global_admin);
+  const [addJoinerOpen, setAddJoinerOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("all");
   const [status, setStatus] = useState("all");
@@ -89,7 +93,18 @@ export function HrPeoplePage() {
 
   if (!canView) return <HrPermissionMessage area="HR People" />;
   return (
-    <HrPage title="People" description="HR records for the people you cover.">
+    <HrPage
+      title="People"
+      description="HR records for the people you cover."
+      actions={
+        canEdit ? (
+          <Button size="sm" onClick={() => setAddJoinerOpen(true)}>
+            <UserPlus className="mr-1.5 h-3.5 w-3.5" />
+            Add joiner
+          </Button>
+        ) : null
+      }
+    >
       <div className="flex flex-wrap gap-2 border-b border-border p-3">
         <div className="relative min-w-[220px] flex-1 sm:max-w-xs">
           <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -190,6 +205,13 @@ export function HrPeoplePage() {
           </table>
         </div>
       )}
+      <HrAddJoinerDialog
+        open={addJoinerOpen}
+        onOpenChange={setAddJoinerOpen}
+        onCreated={(staffId) =>
+          void navigate({ to: "/hr/people/$staffId", params: { staffId } })
+        }
+      />
     </HrPage>
   );
 }

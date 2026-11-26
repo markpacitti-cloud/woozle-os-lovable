@@ -35,6 +35,7 @@ export interface HrMyRequest {
   is_esign: boolean;
   can_respond: boolean;
   is_legal_review_needed: boolean;
+  signed_name?: string | null;
 }
 
 export interface HrMyDetails {

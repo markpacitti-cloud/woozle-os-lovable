@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
+import { formatHrStatus } from "@/lib/hr";
 import type { HrRequest } from "@/lib/hr-types";
 import { api, getErrorMessage } from "@/lib/supabase";
 
@@ -70,7 +71,7 @@ export function HrSentPage() {
             <SelectItem value="all">All statuses</SelectItem>
             {STATUSES.map((item) => (
               <SelectItem key={item} value={item}>
-                {item.replaceAll("_", " ")}
+                {formatHrStatus(item)}
               </SelectItem>
             ))}
           </SelectContent>

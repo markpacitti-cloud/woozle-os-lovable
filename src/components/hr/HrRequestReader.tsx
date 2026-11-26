@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { CheckCircle2, Download, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowDown, CheckCircle2, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { HrAnswersForm } from "@/components/hr/HrAnswersForm";
 import { HrMarkdown, HrStatusBadge } from "@/components/hr/HrShared";
-import { HrSignBlock } from "@/components/hr/HrSignBlock";
+import { HrSignBlock, useScrolledToEnd } from "@/components/hr/HrSignBlock";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -45,12 +45,22 @@ export function HrRequestReader({
   const [files, setFiles] = useState<Record<string, File>>({});
   const [busy, setBusy] = useState(false);
   const [confirmedAt, setConfirmedAt] = useState<string | null>(null);
+  const [signedName, setSignedName] = useState<string | null>(null);
+  const sheetRef = useRef<HTMLDivElement | null>(null);
+
+  const responseKind = request ? getHrResponseKind(request.response_type, request.is_esign) : "none";
+  const { endRef, hasScrolledToEnd } = useScrolledToEnd({
+    enabled: Boolean(open && request?.can_respond && responseKind === "acknowledge_and_sign"),
+    resetKey: `${request?.id ?? ""}:${open}`,
+    containerRef: sheetRef,
+  });
 
   useEffect(() => {
     setComment("");
     setAnswers({});
     setFiles({});
     setConfirmedAt(null);
+    setSignedName(null);
   }, [request?.id]);
 
   useEffect(() => {
@@ -61,9 +71,13 @@ export function HrRequestReader({
   }, [handleApiError, open, request]);
 
   if (!request) return null;
-  const responseKind = getHrResponseKind(request.response_type, request.is_esign);
   const fields = normaliseFormFields(request.form_fields);
   const responseTime = request.responded_at ?? confirmedAt;
+  const displaySignedName = request.signed_name ?? signedName;
+  const showSignedConfirmation =
+    Boolean(signedName) ||
+    ["acknowledge_and_sign", "signed", "acknowledged", "acknowledge"].includes(request.response ?? "");
+  const canDownloadSigned = request.has_signed_file || Boolean(signedName);
 
   const handleFile = (field: HrFormField, file: File) => {
     const problem = validateHrUpload(file);
@@ -116,6 +130,7 @@ export function HrRequestReader({
         ...(response === "acknowledge_and_sign" ? { answers: { agreed: true, typed_name: typedName } } : {}),
       });
       setConfirmedAt(new Date().toISOString());
+      if (response === "acknowledge_and_sign" && typedName) setSignedName(typedName);
       toast.success(response === "acknowledge_and_sign" ? "Signed. A signed copy will be emailed to you." : "Response recorded");
       await onChanged();
     } catch (error) {
@@ -127,7 +142,7 @@ export function HrRequestReader({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full overflow-y-auto p-0 sm:max-w-[680px]">
+      <SheetContent ref={sheetRef} side="right" className="w-full overflow-y-auto p-0 sm:max-w-[680px]">
         <SheetHeader className="border-b border-border px-6 py-5 text-left">
           <div className="flex flex-wrap items-center gap-2 pr-8">
             <HrStatusBadge status={request.status} />
@@ -151,19 +166,38 @@ export function HrRequestReader({
             {request.meeting_location ? <span>{request.meeting_location}</span> : null}
           </div>
           <HrMarkdown body={request.body_snapshot} />
+          <div ref={endRef} aria-hidden="true" className="h-px" />
 
           {responseTime || request.response ? (
             <div className="rounded-lg border border-tag-green bg-tag-green p-4 text-tag-green-foreground">
               <div className="flex items-center gap-2 text-sm font-semibold">
                 <CheckCircle2 className="h-4 w-4" />
-                Response recorded
+                {showSignedConfirmation ? "Document signed" : "Response recorded"}
               </div>
               <p className="mt-1 text-xs">
-                {request.response ? `${request.response.replaceAll("_", " ")} · ` : ""}
+                {displaySignedName
+                  ? `Signed by ${displaySignedName} · `
+                  : request.response
+                    ? `${request.response.replaceAll("_", " ")} · `
+                    : ""}
                 {formatDateTime(responseTime)}
               </p>
               {request.response_comment ? (
                 <p className="mt-2 text-xs">Comment: {request.response_comment}</p>
+              ) : null}
+              {canDownloadSigned ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    void openHrFile("signed", request.id).catch((error: unknown) =>
+                      toast.error(error instanceof Error ? error.message : "Could not open file"),
+                    )
+                  }
+                  className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium underline underline-offset-4 hover:opacity-80"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Download signed copy
+                </button>
               ) : null}
             </div>
           ) : null}
@@ -192,11 +226,11 @@ export function HrRequestReader({
 
           {responseKind === "sign" ? (
             <div className="rounded-md border border-tag-blue bg-tag-blue px-3 py-2 text-xs text-tag-blue-foreground">
-              Check your email to sign. The eSignatures message contains the secure signing link.
+              Check your email to sign.
             </div>
           ) : null}
 
-          {request.has_signed_file ? (
+          {canDownloadSigned && !responseTime && !request.response ? (
             <Button
               variant="outline"
               onClick={() =>
@@ -206,17 +240,29 @@ export function HrRequestReader({
               }
             >
               <Download className="mr-2 h-4 w-4" />
-              View / download signed document
+              Download signed copy
             </Button>
           ) : null}
 
-          {request.can_respond ? (
+          {request.can_respond && responseKind === "acknowledge_and_sign" ? (
+            <div className="border-t border-border pt-5">
+              <HrSignBlock
+                busy={busy}
+                hasScrolledToEnd={hasScrolledToEnd}
+                onSign={(name) => submit("acknowledge_and_sign", name)}
+              />
+            </div>
+          ) : null}
+
+          {request.can_respond && responseKind === "acknowledge_and_sign" && !hasScrolledToEnd ? (
+            <div className="sticky bottom-0 -mx-6 flex items-center justify-center gap-1.5 border-t border-border bg-background/95 px-6 py-2.5 text-xs text-muted-foreground backdrop-blur-xs">
+              <ArrowDown className="h-3.5 w-3.5" />
+              Scroll to the end to continue
+            </div>
+          ) : null}
+
+          {request.can_respond && (responseKind === "accept_decline" || responseKind === "form") ? (
             <div className="sticky bottom-0 -mx-6 flex flex-wrap gap-2 border-t border-border bg-background px-6 py-4">
-              {responseKind === "acknowledge_and_sign" ? (
-                <div className="w-full">
-                  <HrSignBlock busy={busy} onSign={(name) => submit("acknowledge_and_sign", name)} />
-                </div>
-              ) : null}
               {responseKind === "accept_decline" ? (
                 <>
                   <Button size="lg" disabled={busy} onClick={() => void submit("accept")}>

@@ -14,7 +14,13 @@ import {
   getVisibleGroups,
 } from "@/lib/navigation";
 import type { MyAccess } from "@/lib/types";
-import { getHrResponseKind, getNextDocumentStep, isPublicHrResponsePath } from "@/lib/hr";
+import {
+  formatHrStatus,
+  getHrResponseKind,
+  getNextDocumentStep,
+  isPublicHrResponsePath,
+  maskSensitiveValue,
+} from "@/lib/hr";
 
 const baseAccess: MyAccess = {
   is_global_admin: false,
@@ -155,6 +161,7 @@ describe("Woozle OS contract rules", () => {
     expect(getHrResponseKind("acknowledge_and_sign")).toBe("acknowledge_and_sign");
     expect(getHrResponseKind("accept_decline")).toBe("accept_decline");
     expect(getHrResponseKind("form")).toBe("form");
+    expect(getHrResponseKind("esign")).toBe("none");
     expect(getHrResponseKind("none", true)).toBe("sign");
     expect(
       getNextDocumentStep([
@@ -180,5 +187,13 @@ describe("Woozle OS contract rules", () => {
         },
       ]),
     ).toBeNull();
+  });
+
+  it("shows waiting_for_esign as Awaiting signature and masks NI and bank details", () => {
+    expect(formatHrStatus("waiting_for_esign")).toBe("Awaiting signature");
+    expect(formatHrStatus("awaiting_approval")).toBe("awaiting approval");
+    expect(maskSensitiveValue("QQ123456C", 2)).toBe("•••••••6C");
+    expect(maskSensitiveValue("12345678", 4)).toBe("••••5678");
+    expect(maskSensitiveValue(null)).toBe("—");
   });
 });
