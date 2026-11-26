@@ -149,7 +149,7 @@ export function HrMarkdown({ body, className }: { body: string; className?: stri
           DRAFT – NOT LEGALLY REVIEWED
         </div>
       ) : null}
-      <div className="woozle-markdown text-sm leading-6">
+      <div className="woozle-markdown hr-document">
         <ReactMarkdown>{cleanBody}</ReactMarkdown>
       </div>
     </div>

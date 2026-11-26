@@ -256,3 +256,81 @@
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+/* HR document reader (My HR, /hr/respond, Policies, Approvals, Sent, Send preview): HrMarkdown only.
+   Scoped to .hr-document so the assistant panel's .woozle-markdown is unchanged. */
+.woozle-markdown.hr-document {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #374151;
+}
+.woozle-markdown.hr-document > * + * {
+  margin-top: 14px;
+}
+.woozle-markdown.hr-document p {
+  margin: 0;
+}
+.woozle-markdown.hr-document h1 {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #111827;
+  margin: 0 0 32px;
+}
+.woozle-markdown.hr-document h2 {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #111827;
+  margin: 36px 0 12px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+.woozle-markdown.hr-document h3 {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #111827;
+  margin: 24px 0 8px;
+}
+.woozle-markdown.hr-document > h1:first-child,
+.woozle-markdown.hr-document > h2:first-child,
+.woozle-markdown.hr-document > h3:first-child {
+  margin-top: 0;
+}
+.woozle-markdown.hr-document strong {
+  font-weight: 700;
+  color: #111827;
+}
+.woozle-markdown.hr-document ul,
+.woozle-markdown.hr-document ol {
+  padding-left: 24px;
+  margin: 14px 0;
+}
+.woozle-markdown.hr-document li + li {
+  margin-top: 8px;
+}
+.woozle-markdown.hr-document hr {
+  border: 0;
+  border-top: 1px solid #e5e7eb;
+  margin: 32px 0;
+}
+.woozle-markdown.hr-document table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.woozle-markdown.hr-document th,
+.woozle-markdown.hr-document td {
+  border: 1px solid #e5e7eb;
+  padding: 10px;
+  text-align: left;
+  vertical-align: top;
+}
+.woozle-markdown.hr-document th {
+  font-weight: 600;
+  color: #111827;
+  background-color: #f9fafb;
+}
