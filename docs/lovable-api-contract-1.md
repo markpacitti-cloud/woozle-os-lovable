@@ -97,7 +97,7 @@ Each action is all-or-nothing: if it fails, nothing it did is kept.
 ready-made yes/no flags for the current person: `is_global_admin, companies_view, companies_edit,
 people_view, people_edit, deals_view, deals_edit, notes_view, notes_add, notes_change_any,
 tasks_sales_view, tasks_sales_edit, tasks_marketing_view, tasks_marketing_edit, blog_view,
-blog_edit, blog_approve, admin_view, admin_edit, can_hard_delete` (always false). **Use
+blog_edit, blog_approve, admin_view, admin_edit, can_hard_delete` (always false), and for the HR space `hr_my, hr_team, hr_admin_view, hr_admin_edit, hr_approve, hr_settings_admin`. **Use
 `my_access` to show and hide things.**
 
 | Role | Can see | Can change |
@@ -108,7 +108,7 @@ blog_edit, blog_approve, admin_view, admin_edit, can_hard_delete` (always false)
 | Delivery | companies, people, deals (read) | people (`delivery.edit`); not companies or deals |
 | Finance | companies, people, deals (read) | nothing in the CRM |
 | Compliance | companies, people (read) | nothing in the CRM |
-| HR | no CRM data | nothing in the CRM |
+| HR | no CRM data; the HR space (see `lovable-api-contract-hr.md`) | HR records, documents, cases (HR space only) |
 
 Other rules:
 - **Blog approval** (`approve_request`, `send_back_request`, `restore_blog_item`) needs
@@ -131,8 +131,8 @@ Other rules:
 
 One app with a **space switcher** (top-left square badge in the space colour). The switcher lists
 only the spaces the person may see. The URL decides the space: `/marketing/…` is Marketing, `/admin/…`
-is Admin, everything else is Sales. **Delivery is coming later. Don't build it yet.** Finance and HR
-also come later ("Coming soon" in the switcher).
+is Admin, `/hr/…` is HR, everything else is Sales. **Delivery is coming later. Don't build it yet.** Finance
+also comes later ("Coming soon" in the switcher). The **HR space** is for everyone; its pages, data and rules are in `lovable-api-contract-hr.md`.
 
 **General group, first in every space:** Start, Inbox (dot when unread), Tasks.
 
