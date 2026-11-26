@@ -11,8 +11,15 @@ design and the general rules are in part 1 (`lovable-api-contract-1.md`); they a
    to the assistant panel. The assistant (`ai-chat`) has no HR tools by design.
 3. Files (signed contracts, passports, attached documents) are only reachable through `hr-files`
    short-lived links (5 minutes). Open them in a new tab; never store the link.
-4. Responses (Acknowledge / Accept / Decline / form) go through the edge function `hr-respond`, never an
-   `rpc`: the server records the evidence (sign-in, IP, browser, document hash, time).
+4. Responses go through the edge functions `hr-respond` (signed in) or `hr-public-respond` (secure link), never an
+   `rpc`: the server records the evidence (sign-in, IP, browser, the email it was sent to, document hash, time).
+   Response types (`response_type`): `none`, `acknowledge_and_sign`, `accept_decline`, `form`.
+   **Acknowledge and sign** (in the app; eSignatures is off, `hr.esign_enabled` = false): show the whole document,
+   a tick box "I have read and agree to this document", a "Type your full name" field and an **Acknowledge and sign**
+   button (enabled once ticked and a name of 2+ characters is typed). Send
+   `{ response: "acknowledge_and_sign", answers: { agreed: true, typed_name } }`. The server then builds a signed PDF
+   (document, signature block, audit page), stores it as the signed file (`has_signed_file`) and emails a copy to the
+   person and payroll. `hr_my_requests.signed_name` shows the typed name.
 . **Unreviewed drafts (staging testing only).** While `hr.email_redirect_to` is set (staging), HR can publish and send a
    version still marked "needs legal review". Its text then starts with the line `> **DRAFT – NOT LEGALLY REVIEWED**`
    (`hr_my_requests.body_snapshot`, `hr_policies.body`, the public response page) and its email shows the same banner.
@@ -64,9 +71,9 @@ app address in settings (`hr.app_base_url`).
 - **`hr_my_details`**: one row, the signed-in person (directory + private details). Edit with `hr_update_my_details`.
   `staff_id uuid, full_name text, work_email text, job_title text, department text, grade text, employment_status text, start_date date, probation_end_date date, leave_date date, place_of_work text, line_manager_name text, annual_salary num, salary_currency char(3), contract_template text, contract_end_date date, notice_period text, hours_per_week numeric(5,2), personal_email text, personal_phone text, legal_name text, address_line1 text, address_line2 text, city text, region text, postcode text, country text, gender text, date_of_birth date, ni_number text, starter_statement text, previous_pay text, has_student_loan bool, student_loan_plan text, student_loan_start date, student_loan_end date, has_postgraduate_loan bool, postgraduate_loan_start date, postgraduate_loan_end date, is_studies_finished_before_april bool, has_pension_elsewhere bool, visa_hours_cap text, bank_sort_code text, bank_account_number text, next_of_kin_name text, next_of_kin_relationship text, next_of_kin_phone text, next_of_kin_email text, rtw_share_code text, rtw_expiry date, rtw_evidence_count int, payroll_submitted_at ts, updated_at ts`
 - **`hr_my_requests`**: documents sent to me, newest first (`.order('sent_at', { ascending: false })`). To-do =
-  `can_respond`. Render `body_snapshot` as Markdown. Opening one: call `hr_mark_viewed`. Contracts (`is_esign`)
-  are signed in the eSignatures email; show "Check your email to sign".
-  `id uuid, status text, subject text, document_title text, document_key text, document_version int, kind text, response_type text, form_fields jsonb, body_snapshot text, body_sha256 text, meeting_at ts, meeting_location text, sent_at ts, due_at ts, viewed_at ts, responded_at ts, response text, response_comment text, sent_by_name text, has_signed_file bool, is_esign bool, can_respond bool, is_legal_review_needed bool`
+  `can_respond`. Render `body_snapshot` as Markdown. Opening one: call `hr_mark_viewed`. Only OLD contracts
+  (`is_esign`, sent before in-app signing) are signed in the eSignatures email; show "Check your email to sign" for those.
+  `id uuid, status text, subject text, document_title text, document_key text, document_version int, kind text, response_type text, form_fields jsonb, body_snapshot text, body_sha256 text, meeting_at ts, meeting_location text, sent_at ts, due_at ts, viewed_at ts, responded_at ts, response text, response_comment text, sent_by_name text, has_signed_file bool, is_esign bool, can_respond bool, is_legal_review_needed bool, signed_name text`
 - **`hr_my_shared_notes`**: notes my manager or HR shared with me.
   `id uuid, note_type text, body text, shared_at ts, author_name text`
 
@@ -121,9 +128,9 @@ Errors: `42501` not allowed, `P0002` not found, `22023` bad input or not allowed
 | Action | Arguments | Returns | Notes |
 |---|---|---|---|
 | `hr_update_my_details` | `p_changes jsonb` | void | Own contact, address, payroll, loans, bank, next of kin, share code. Salary / terms are refused. Sort code and account digits only (dashes are removed). |
-| `hr_update_private` | `p_staff_id uuid, p_changes jsonb` | void | HR: any private field incl. `annual_salary`, `contract_template`, `contract_end_date`, `notice_period`, `hours_per_week`. |
-| `hr_update_employment` | `p_staff_id uuid, p_changes jsonb` | void | HR: `job_title, department, grade, line_manager_staff_id, employment_status, start_date, probation_end_date, leave_date, place_of_work` (lists from `hr_settings`). Setting `leave_date` sets the retention dates. |
-| `hr_create_joiner` | `p_full_name text, p_work_email text, p_personal_email text, p_start_date date, p_job_title? text, p_department? text, p_line_manager_staff_id? uuid, p_place_of_work? text, p_probation_end_date? date` | uuid | HR: a pre-joiner (planned work email, personal email). They get secure links until they can sign in. |
+| `hr_update_private` | `p_staff_id uuid, p_changes jsonb` | void | HR / global admin. Accepted fields: `annual_salary`, `contract_template` (one of `hr.contract_templates`: Graduate, Analyst, Associate, Associate-Director, Director), `contract_end_date`, `notice_period`, `hours` (or `hours_per_week`), and every field of `hr_update_my_details`. Unknown fields are refused (22023). |
+| `hr_update_employment` | `p_staff_id uuid, p_changes jsonb` | void | HR / global admin. Accepted fields: `job_title`, `department`, `grade`, `line_manager_staff_id`, `employment_status`, `start_date`, `probation_end_date`, `leave_date`, `place_of_work` (department, grade, status and place from the lists in `hr_settings`). Unknown fields are refused (22023). Setting `leave_date` sets the retention dates. |
+| `hr_create_joiner` | `p_full_name text, p_work_email text, p_personal_email text, p_start_date date, p_job_title? text, p_department? text, p_line_manager_staff_id? uuid, p_place_of_work? text, p_probation_end_date? date` | uuid | HR / global admin: a pre-joiner (planned work email, personal email; optional job title, department, line manager, place of work, probation end). Status `pre_joiner`. They get secure links until they can sign in. Then set the contract type and salary with `hr_update_private`. |
 
 ### Documents (HR)
 | Action | Arguments | Returns | Notes |
@@ -145,6 +152,7 @@ Errors: `42501` not allowed, `P0002` not found, `22023` bad input or not allowed
 | `hr_start_case` | `p_staff_id uuid, p_case_type text, p_title? text, p_is_restricted? bool=false, p_owner_staff_id? uuid` | uuid | Copies the playbook's steps. Managers: manager-startable types for direct reports only; `p_is_restricted` / `p_owner_staff_id` HR only. |
 | `hr_update_case` | `p_case_id uuid, p_changes jsonb` | void | `title, status (open/on_hold), owner_staff_id, is_restricted, summary`. |
 | `hr_tick_step` | `p_case_id uuid, p_step_key text, p_done? bool=true` | void | Steps linked to a request tick themselves when it completes. |
+| `hr_send_next_step` | `p_case_id uuid` | jsonb | Use the edge function `hr-send` action `next_step` (it also sends). Joiner case: the contract first (picked from the person's `contract_template`; none set: "Set the contract type on this person's Employment & pay tab first."); when it is signed the other documents go automatically. Returns `{ queued, waiting_for: "contract" | null, errors? }`. |
 | `hr_close_case` | `p_case_id uuid, p_outcome text` | void | Outcome required. |
 | `hr_archive_case` | `p_case_id uuid` | void | Closed cases, HR / global admin. |
 
@@ -164,7 +172,7 @@ Errors: `42501` not allowed, `P0002` not found, `22023` bad input or not allowed
 
 ## 6. Merge fields
 
-Filled from the records at send time: `employee_full_name, employee_first_name, employee_legal_name, job_title,
+Write them as `{{ field_name }}` (with spaces; `{{field_name}}` also works). Sending is refused (22023) if any field would be empty or unknown, and the message lists them. Filled from the records at send time: `employee_full_name, employee_first_name, employee_legal_name, job_title,
 department, grade, start_date, probation_end_date, leave_date, end_date, place_of_work, annual_salary ("£40,000"),
 notice_period, line_manager_name, sender_name, sender_job_title, today, contract_send_date, meeting_date,
 meeting_time, meeting_location, due_date, company_name`. Anything else must be listed in the document's
@@ -179,11 +187,13 @@ errors: `401 sign_in_required`, `403 { error: 'no_access', message }`, `400 { er
 `{ action: 'send', request_id, note? }` → `{ status: 'sent' | 'queued' | 'awaiting_approval' }` ·
 `{ action: 'resend', request_id }` · `{ action: 'cancel', request_id, reason? }` → `{ status: 'cancelled', esign_withdrawn }` ·
 `{ action: 'decide', approval_id, approve: true|false, comment? }` (comment required to send back) ·
-`{ action: 'publish', document_id }` → `{ status: 'published', acknowledgements_queued }`.
+`{ action: 'publish', document_id }` → `{ status: 'published', acknowledgements_queued }`. ·
+`{ action: 'next_step', case_id }` → `{ queued, waiting_for, sent }` ("Send next document" on a case page).
 `queued` means the email will be retried automatically; the request shows `last_send_error` meanwhile.
 
 ### `hr-respond` (signed in)
-`{ request_id, response: 'acknowledge' | 'accept' | 'decline' | 'submit', comment?, answers? }` → `{ status, response }`.
+`{ request_id, response: 'acknowledge_and_sign' | 'accept' | 'decline' | 'submit', comment?, answers? }` → `{ status, response }`.
+For `acknowledge_and_sign`: `answers: { agreed: true, typed_name }` (errors: "Tick ..." / "Type your full name to sign.").
 Forms send `answers` as `{ [field.key]: value }` (booleans as true/false, dates `YYYY-MM-DD`, select values).
 File fields are uploaded first with `hr-files` (`upload`, kind `rtw`, id = my staff id).
 
@@ -198,7 +208,7 @@ File fields are uploaded first with `hr-files` (`upload`, kind `rtw`, id = my st
 or `state` `expired` | `used` | `cancelled` (410) / `not_found` (404): show a friendly message ("This link has
 expired. Please reply to the email and we'll send a new one.").
 `POST { token, action: 'upload', file_name, content_type, data_base64 }` → `{ uploaded: true }` ·
-`POST { token, action: 'submit', response, comment?, answers? }` → `{ status }`. Links work once and expire after 14 days.
+`POST { token, action: 'submit', response, comment?, answers? }` → `{ status }` (same responses and answers as `hr-respond`, including acknowledge and sign). Links work once and expire after 14 days.
 Call it with plain `fetch` (no Authorization header) at `<project URL>/functions/v1/hr-public-respond`.
 
 `hr-esign-webhook` and `hr-worker` are server-only (eSignatures and the scheduler); never call them.
