@@ -13,7 +13,11 @@ design and the general rules are in part 1 (`lovable-api-contract-1.md`); they a
    short-lived links (5 minutes). Open them in a new tab; never store the link.
 4. Responses (Acknowledge / Accept / Decline / form) go through the edge function `hr-respond`, never an
    `rpc`: the server records the evidence (sign-in, IP, browser, document hash, time).
-5. Dates are `YYYY-MM-DD`; show them as en-GB ("4 Jan 2027"). Money in `hr_person_private` is GBP.
+. **Unreviewed drafts (staging testing only).** While `hr.email_redirect_to` is set (staging), HR can publish and send a
+   version still marked "needs legal review". Its text then starts with the line `> **DRAFT – NOT LEGALLY REVIEWED**`
+   (`hr_my_requests.body_snapshot`, `hr_policies.body`, the public response page) and its email shows the same banner.
+   Render that line as a red warning banner. `is_legal_review_needed` is true on such rows. When the redirect is empty
+   (prod) publishing or sending an unreviewed version is refused (`22023`).
 
 ## 2. Who can do what (plain English)
 
@@ -62,7 +66,7 @@ app address in settings (`hr.app_base_url`).
 - **`hr_my_requests`**: documents sent to me, newest first (`.order('sent_at', { ascending: false })`). To-do =
   `can_respond`. Render `body_snapshot` as Markdown. Opening one: call `hr_mark_viewed`. Contracts (`is_esign`)
   are signed in the eSignatures email; show "Check your email to sign".
-  `id uuid, status text, subject text, document_title text, document_key text, document_version int, kind text, response_type text, form_fields jsonb, body_snapshot text, body_sha256 text, meeting_at ts, meeting_location text, sent_at ts, due_at ts, viewed_at ts, responded_at ts, response text, response_comment text, sent_by_name text, has_signed_file bool, is_esign bool, can_respond bool`
+  `id uuid, status text, subject text, document_title text, document_key text, document_version int, kind text, response_type text, form_fields jsonb, body_snapshot text, body_sha256 text, meeting_at ts, meeting_location text, sent_at ts, due_at ts, viewed_at ts, responded_at ts, response text, response_comment text, sent_by_name text, has_signed_file bool, is_esign bool, can_respond bool, is_legal_review_needed bool`
 - **`hr_my_shared_notes`**: notes my manager or HR shared with me.
   `id uuid, note_type text, body text, shared_at ts, author_name text`
 
@@ -70,7 +74,7 @@ app address in settings (`hr.app_base_url`).
 - **`hr_staff_directory`**: all staff (directory columns only).
   `staff_id uuid, full_name text, work_email text, job_title text, department text, grade text, employment_status text, start_date date, probation_end_date date, leave_date date, place_of_work text, line_manager_staff_id uuid, line_manager_name text, can_sign_in bool`
 - **`hr_policies`**: current internal and public policies. Search: `.textSearch('search', q, { type: 'websearch', config: 'english' })`; never select `search` itself.
-  `id uuid, document_key text, version int, title text, category text, summary text, body text, audience text, effective_from date, review_due date, published_at ts, response_type text, search tsvector`
+  `id uuid, document_key text, version int, title text, category text, summary text, body text, audience text, effective_from date, review_due date, published_at ts, response_type text, search tsvector, is_legal_review_needed bool`
 - **`hr_settings`**: HR settings (`key`, JSON `value`): the dropdown lists `hr.departments`, `hr.grades`,
   `hr.employment_statuses`, `hr.places_of_work`, `hr.note_types`; `hr.playbooks`; timings; `hr.app_base_url`;
   `hr.email_redirect_to` (staging test address; show a banner "Staging: all HR email goes to …" when set).
@@ -102,7 +106,7 @@ app address in settings (`hr.app_base_url`).
   `id uuid, staff_id uuid, staff_name text, author_staff_id uuid, author_name text, case_id uuid, case_title text, note_type text, body text, is_shared_with_employee bool, shared_at ts, can_edit bool, created_at ts, updated_at ts`
   `id uuid, staff_id uuid, staff_name text, author_staff_id uuid, author_name text, note_type text, body text, archived_at ts`
 - **`hr_documents_list`**: every version (HR). One current version per `document_key` (`is_current`).
-  `is_legal_review_needed` blocks publishing. `form_fields`: `[{ key, label, type: text|email|phone|date|select|boolean|textarea|file, required, options?: [{ value, label }], help? }]`.
+  `is_legal_review_needed` blocks publishing on prod; on staging (redirect set) it is allowed for testing and adds the draft banner (rule 6). Show a "Needs legal review" badge. `form_fields`: `[{ key, label, type: text|email|phone|date|select|boolean|textarea|file, required, options?: [{ value, label }], help? }]`.
   Merge fields in `body` / `title`: `{{ field_name }}` (see §6).
   `id uuid, document_key text, version int, title text, kind text, category text, status text, is_current bool, is_legal_review_needed bool, effective_from date, review_due date, summary text, body text, file_path text, esign_template_id text, response_type text, form_fields jsonb, extra_merge_fields text[], is_hr_approval_required bool, is_manager_sendable bool, audience text, is_all_staff_ack_required bool, published_at ts, published_by_name text, search tsvector, updated_at ts`
 - **`hr_approvals_list`**: HR approvals (letters waiting to be sent). Approve / Send back where `can_decide`.
