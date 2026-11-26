@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import { HrAnswersForm } from "@/components/hr/HrAnswersForm";
 import { HrMarkdown, HrStatusBadge } from "@/components/hr/HrShared";
+import { HrSignBlock } from "@/components/hr/HrSignBlock";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -74,7 +75,10 @@ export function HrRequestReader({
     setAnswers((current) => ({ ...current, [field.key]: file.name }));
   };
 
-  const submit = async (response: "acknowledge" | "accept" | "decline" | "submit") => {
+  const submit = async (
+    response: "acknowledge_and_sign" | "accept" | "decline" | "submit",
+    typedName?: string,
+  ) => {
     if (response === "submit") {
       for (const field of fields) {
         if (field.required && (answers[field.key] === undefined || answers[field.key] === "")) {
@@ -109,9 +113,10 @@ export function HrRequestReader({
         response,
         ...(comment.trim() ? { comment: comment.trim() } : {}),
         ...(response === "submit" ? { answers } : {}),
+        ...(response === "acknowledge_and_sign" ? { answers: { agreed: true, typed_name: typedName } } : {}),
       });
       setConfirmedAt(new Date().toISOString());
-      toast.success("Response recorded");
+      toast.success(response === "acknowledge_and_sign" ? "Signed. A signed copy will be emailed to you." : "Response recorded");
       await onChanged();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Response failed");
@@ -207,11 +212,10 @@ export function HrRequestReader({
 
           {request.can_respond ? (
             <div className="sticky bottom-0 -mx-6 flex flex-wrap gap-2 border-t border-border bg-background px-6 py-4">
-              {responseKind === "acknowledge" ? (
-                <Button size="lg" disabled={busy} onClick={() => void submit("acknowledge")}>
-                  {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  Acknowledge
-                </Button>
+              {responseKind === "acknowledge_and_sign" ? (
+                <div className="w-full">
+                  <HrSignBlock busy={busy} onSign={(name) => submit("acknowledge_and_sign", name)} />
+                </div>
               ) : null}
               {responseKind === "accept_decline" ? (
                 <>

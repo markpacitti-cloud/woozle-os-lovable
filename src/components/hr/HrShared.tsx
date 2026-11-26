@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, FileText, LockKeyhole } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -150,7 +151,7 @@ export function HrMarkdown({ body, className }: { body: string; className?: stri
         </div>
       ) : null}
       <div className="woozle-markdown hr-document">
-        <ReactMarkdown>{cleanBody}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{cleanBody}</ReactMarkdown>
       </div>
     </div>
   );

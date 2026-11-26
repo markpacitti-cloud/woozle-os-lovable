@@ -78,7 +78,7 @@ export function HrPoliciesPage() {
   const selected = filtered.find((row) => row.id === selectedId) ?? filtered[0] ?? null;
   const acknowledged = new Set(
     (requestsQuery.data ?? [])
-      .filter((request) => request.status === "completed" && request.response === "acknowledge")
+      .filter((request) => request.status === "completed" && ["acknowledged", "signed", "acknowledge"].includes(request.response ?? ""))
       .map((request) => request.document_key),
   );
 

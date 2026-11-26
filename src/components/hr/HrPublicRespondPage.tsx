@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { HrAnswersForm } from "@/components/hr/HrAnswersForm";
 import { HrMarkdown } from "@/components/hr/HrShared";
+import { HrSignBlock } from "@/components/hr/HrSignBlock";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -44,7 +45,10 @@ export function HrPublicRespondPage({ token }: { token?: string | undefined }) {
     queryFn: () => publicRequest<HrPublicResponse>(token!),
   });
 
-  const submit = async (response: "acknowledge" | "accept" | "decline" | "submit") => {
+  const submit = async (
+    response: "acknowledge_and_sign" | "accept" | "decline" | "submit",
+    typedName?: string,
+  ) => {
     if (!token || !query.data) return;
     const fields = normaliseFormFields(query.data.form_fields);
     if (response === "submit") {
@@ -81,6 +85,7 @@ export function HrPublicRespondPage({ token }: { token?: string | undefined }) {
           response,
           ...(comment.trim() ? { comment: comment.trim() } : {}),
           ...(response === "submit" ? { answers } : {}),
+          ...(response === "acknowledge_and_sign" ? { answers: { agreed: true, typed_name: typedName } } : {}),
         }),
       });
       setCompletedAt(new Date().toISOString());
@@ -179,10 +184,10 @@ export function HrPublicRespondPage({ token }: { token?: string | undefined }) {
                 <div className="flex flex-wrap gap-2 border-t border-border pt-5">
                   {(() => {
                     const kind = getHrResponseKind(query.data.response_type);
-                    return kind === "acknowledge" ? (
-                      <Button size="lg" disabled={busy} onClick={() => void submit("acknowledge")}>
-                        Acknowledge
-                      </Button>
+                    return kind === "acknowledge_and_sign" ? (
+                      <div className="w-full">
+                        <HrSignBlock busy={busy} onSign={(name) => submit("acknowledge_and_sign", name)} />
+                      </div>
                     ) : kind === "accept_decline" ? (
                       <>
                         <Button size="lg" disabled={busy} onClick={() => void submit("accept")}>

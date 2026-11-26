@@ -30,7 +30,7 @@ export const HR_MERGE_FIELDS = [
   "company_name",
 ] as const;
 
-export type HrResponseKind = "acknowledge" | "accept_decline" | "form" | "sign" | "none";
+export type HrResponseKind = "acknowledge_and_sign" | "accept_decline" | "form" | "sign" | "none";
 
 export function getHrResponseKind(
   responseType: string | null | undefined,
@@ -41,7 +41,7 @@ export function getHrResponseKind(
     .trim()
     .toLowerCase()
     .replace(/[\s-]+/g, "_");
-  if (value === "acknowledge" || value === "acknowledgement") return "acknowledge";
+  if (["acknowledge_and_sign", "acknowledge", "acknowledgement"].includes(value)) return "acknowledge_and_sign";
   if (["accept_decline", "accept/decline", "accept", "decline", "acceptance"].includes(value)) {
     return "accept_decline";
   }

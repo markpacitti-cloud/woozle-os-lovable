@@ -151,7 +151,8 @@ describe("Woozle OS contract rules", () => {
   });
 
   it("maps documented response controls and finds the next unsent document step", () => {
-    expect(getHrResponseKind("acknowledge")).toBe("acknowledge");
+    expect(getHrResponseKind("acknowledge")).toBe("acknowledge_and_sign");
+    expect(getHrResponseKind("acknowledge_and_sign")).toBe("acknowledge_and_sign");
     expect(getHrResponseKind("accept_decline")).toBe("accept_decline");
     expect(getHrResponseKind("form")).toBe("form");
     expect(getHrResponseKind("none", true)).toBe("sign");
