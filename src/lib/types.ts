@@ -28,6 +28,12 @@ export interface MyAccess {
   admin_view: boolean;
   admin_edit: boolean;
   can_hard_delete: boolean;
+  hr_my: boolean;
+  hr_team: boolean;
+  hr_admin_view: boolean;
+  hr_admin_edit: boolean;
+  hr_approve: boolean;
+  hr_settings_admin: boolean;
 }
 
 export interface ConnectionStatus {

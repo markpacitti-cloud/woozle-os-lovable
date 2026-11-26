@@ -64,6 +64,7 @@
   --color-space-sales: var(--space-sales);
   --color-space-marketing: var(--space-marketing);
   --color-space-admin: var(--space-admin);
+  --color-space-hr: var(--space-hr);
   --color-tag-blue: var(--tag-blue);
   --color-tag-blue-foreground: var(--tag-blue-foreground);
   --color-tag-orange: var(--tag-orange);
@@ -122,6 +123,7 @@
   --space-sales: oklch(0.488 0.217 264);
   --space-marketing: oklch(0.541 0.245 293);
   --space-admin: oklch(0.495 0.011 255);
+  --space-hr: oklch(0.437 0.078 174);
   --tag-blue: oklch(0.95 0.025 255);
   --tag-blue-foreground: oklch(0.43 0.17 262);
   --tag-orange: oklch(0.955 0.032 62);

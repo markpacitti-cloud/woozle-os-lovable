@@ -14,9 +14,21 @@ import { Route as SectionRouteImport } from './routes/$section'
 import { Route as AdminSectionRouteImport } from './routes/admin.$section'
 import { Route as CompaniesIndexRouteImport } from './routes/companies.index'
 import { Route as CompaniesCompanyIdRouteImport } from './routes/companies.$companyId'
+import { Route as HrApprovalsRouteImport } from './routes/hr.approvals'
+import { Route as HrMyRouteImport } from './routes/hr.my'
+import { Route as HrPoliciesRouteImport } from './routes/hr.policies'
+import { Route as HrRespondRouteImport } from './routes/hr.respond'
+import { Route as HrSentRouteImport } from './routes/hr.sent'
+import { Route as HrTemplatesRouteImport } from './routes/hr.templates'
 import { Route as MarketingSectionRouteImport } from './routes/marketing.$section'
 import { Route as PeopleIndexRouteImport } from './routes/people.index'
 import { Route as PeoplePersonIdRouteImport } from './routes/people.$personId'
+import { Route as HrCasesIndexRouteImport } from './routes/hr.cases.index'
+import { Route as HrCasesCaseIdRouteImport } from './routes/hr.cases.$caseId'
+import { Route as HrPeopleIndexRouteImport } from './routes/hr.people.index'
+import { Route as HrPeopleStaffIdRouteImport } from './routes/hr.people.$staffId'
+import { Route as HrTeamIndexRouteImport } from './routes/hr.team.index'
+import { Route as HrTeamStaffIdRouteImport } from './routes/hr.team.$staffId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -43,6 +55,36 @@ const CompaniesCompanyIdRoute = CompaniesCompanyIdRouteImport.update({
   path: '/companies/$companyId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HrApprovalsRoute = HrApprovalsRouteImport.update({
+  id: '/hr/approvals',
+  path: '/hr/approvals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HrMyRoute = HrMyRouteImport.update({
+  id: '/hr/my',
+  path: '/hr/my',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HrPoliciesRoute = HrPoliciesRouteImport.update({
+  id: '/hr/policies',
+  path: '/hr/policies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HrRespondRoute = HrRespondRouteImport.update({
+  id: '/hr/respond',
+  path: '/hr/respond',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HrSentRoute = HrSentRouteImport.update({
+  id: '/hr/sent',
+  path: '/hr/sent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HrTemplatesRoute = HrTemplatesRouteImport.update({
+  id: '/hr/templates',
+  path: '/hr/templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketingSectionRoute = MarketingSectionRouteImport.update({
   id: '/marketing/$section',
   path: '/marketing/$section',
@@ -58,26 +100,80 @@ const PeoplePersonIdRoute = PeoplePersonIdRouteImport.update({
   path: '/people/$personId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HrCasesIndexRoute = HrCasesIndexRouteImport.update({
+  id: '/hr/cases/',
+  path: '/hr/cases/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HrCasesCaseIdRoute = HrCasesCaseIdRouteImport.update({
+  id: '/hr/cases/$caseId',
+  path: '/hr/cases/$caseId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HrPeopleIndexRoute = HrPeopleIndexRouteImport.update({
+  id: '/hr/people/',
+  path: '/hr/people/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HrPeopleStaffIdRoute = HrPeopleStaffIdRouteImport.update({
+  id: '/hr/people/$staffId',
+  path: '/hr/people/$staffId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HrTeamIndexRoute = HrTeamIndexRouteImport.update({
+  id: '/hr/team/',
+  path: '/hr/team/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HrTeamStaffIdRoute = HrTeamStaffIdRouteImport.update({
+  id: '/hr/team/$staffId',
+  path: '/hr/team/$staffId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$section': typeof SectionRoute
   '/admin/$section': typeof AdminSectionRoute
   '/companies/$companyId': typeof CompaniesCompanyIdRoute
+  '/hr/approvals': typeof HrApprovalsRoute
+  '/hr/my': typeof HrMyRoute
+  '/hr/policies': typeof HrPoliciesRoute
+  '/hr/respond': typeof HrRespondRoute
+  '/hr/sent': typeof HrSentRoute
+  '/hr/templates': typeof HrTemplatesRoute
   '/marketing/$section': typeof MarketingSectionRoute
   '/people/$personId': typeof PeoplePersonIdRoute
   '/companies/': typeof CompaniesIndexRoute
   '/people/': typeof PeopleIndexRoute
+  '/hr/cases/$caseId': typeof HrCasesCaseIdRoute
+  '/hr/people/$staffId': typeof HrPeopleStaffIdRoute
+  '/hr/team/$staffId': typeof HrTeamStaffIdRoute
+  '/hr/cases/': typeof HrCasesIndexRoute
+  '/hr/people/': typeof HrPeopleIndexRoute
+  '/hr/team/': typeof HrTeamIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$section': typeof SectionRoute
   '/admin/$section': typeof AdminSectionRoute
   '/companies/$companyId': typeof CompaniesCompanyIdRoute
+  '/hr/approvals': typeof HrApprovalsRoute
+  '/hr/my': typeof HrMyRoute
+  '/hr/policies': typeof HrPoliciesRoute
+  '/hr/respond': typeof HrRespondRoute
+  '/hr/sent': typeof HrSentRoute
+  '/hr/templates': typeof HrTemplatesRoute
   '/marketing/$section': typeof MarketingSectionRoute
   '/people/$personId': typeof PeoplePersonIdRoute
   '/companies': typeof CompaniesIndexRoute
   '/people': typeof PeopleIndexRoute
+  '/hr/cases/$caseId': typeof HrCasesCaseIdRoute
+  '/hr/people/$staffId': typeof HrPeopleStaffIdRoute
+  '/hr/team/$staffId': typeof HrTeamStaffIdRoute
+  '/hr/cases': typeof HrCasesIndexRoute
+  '/hr/people': typeof HrPeopleIndexRoute
+  '/hr/team': typeof HrTeamIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -85,10 +181,22 @@ export interface FileRoutesById {
   '/$section': typeof SectionRoute
   '/admin/$section': typeof AdminSectionRoute
   '/companies/$companyId': typeof CompaniesCompanyIdRoute
+  '/hr/approvals': typeof HrApprovalsRoute
+  '/hr/my': typeof HrMyRoute
+  '/hr/policies': typeof HrPoliciesRoute
+  '/hr/respond': typeof HrRespondRoute
+  '/hr/sent': typeof HrSentRoute
+  '/hr/templates': typeof HrTemplatesRoute
   '/marketing/$section': typeof MarketingSectionRoute
   '/people/$personId': typeof PeoplePersonIdRoute
   '/companies/': typeof CompaniesIndexRoute
   '/people/': typeof PeopleIndexRoute
+  '/hr/cases/$caseId': typeof HrCasesCaseIdRoute
+  '/hr/people/$staffId': typeof HrPeopleStaffIdRoute
+  '/hr/team/$staffId': typeof HrTeamStaffIdRoute
+  '/hr/cases/': typeof HrCasesIndexRoute
+  '/hr/people/': typeof HrPeopleIndexRoute
+  '/hr/team/': typeof HrTeamIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,30 +205,66 @@ export interface FileRouteTypes {
     | '/$section'
     | '/admin/$section'
     | '/companies/$companyId'
+    | '/hr/approvals'
+    | '/hr/my'
+    | '/hr/policies'
+    | '/hr/respond'
+    | '/hr/sent'
+    | '/hr/templates'
     | '/marketing/$section'
     | '/people/$personId'
     | '/companies/'
     | '/people/'
+    | '/hr/cases/$caseId'
+    | '/hr/people/$staffId'
+    | '/hr/team/$staffId'
+    | '/hr/cases/'
+    | '/hr/people/'
+    | '/hr/team/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/$section'
     | '/admin/$section'
     | '/companies/$companyId'
+    | '/hr/approvals'
+    | '/hr/my'
+    | '/hr/policies'
+    | '/hr/respond'
+    | '/hr/sent'
+    | '/hr/templates'
     | '/marketing/$section'
     | '/people/$personId'
     | '/companies'
     | '/people'
+    | '/hr/cases/$caseId'
+    | '/hr/people/$staffId'
+    | '/hr/team/$staffId'
+    | '/hr/cases'
+    | '/hr/people'
+    | '/hr/team'
   id:
     | '__root__'
     | '/'
     | '/$section'
     | '/admin/$section'
     | '/companies/$companyId'
+    | '/hr/approvals'
+    | '/hr/my'
+    | '/hr/policies'
+    | '/hr/respond'
+    | '/hr/sent'
+    | '/hr/templates'
     | '/marketing/$section'
     | '/people/$personId'
     | '/companies/'
     | '/people/'
+    | '/hr/cases/$caseId'
+    | '/hr/people/$staffId'
+    | '/hr/team/$staffId'
+    | '/hr/cases/'
+    | '/hr/people/'
+    | '/hr/team/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -128,10 +272,22 @@ export interface RootRouteChildren {
   SectionRoute: typeof SectionRoute
   AdminSectionRoute: typeof AdminSectionRoute
   CompaniesCompanyIdRoute: typeof CompaniesCompanyIdRoute
+  HrApprovalsRoute: typeof HrApprovalsRoute
+  HrMyRoute: typeof HrMyRoute
+  HrPoliciesRoute: typeof HrPoliciesRoute
+  HrRespondRoute: typeof HrRespondRoute
+  HrSentRoute: typeof HrSentRoute
+  HrTemplatesRoute: typeof HrTemplatesRoute
   MarketingSectionRoute: typeof MarketingSectionRoute
   PeoplePersonIdRoute: typeof PeoplePersonIdRoute
   CompaniesIndexRoute: typeof CompaniesIndexRoute
   PeopleIndexRoute: typeof PeopleIndexRoute
+  HrCasesCaseIdRoute: typeof HrCasesCaseIdRoute
+  HrPeopleStaffIdRoute: typeof HrPeopleStaffIdRoute
+  HrTeamStaffIdRoute: typeof HrTeamStaffIdRoute
+  HrCasesIndexRoute: typeof HrCasesIndexRoute
+  HrPeopleIndexRoute: typeof HrPeopleIndexRoute
+  HrTeamIndexRoute: typeof HrTeamIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -171,6 +327,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompaniesCompanyIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hr/approvals': {
+      id: '/hr/approvals'
+      path: '/hr/approvals'
+      fullPath: '/hr/approvals'
+      preLoaderRoute: typeof HrApprovalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hr/my': {
+      id: '/hr/my'
+      path: '/hr/my'
+      fullPath: '/hr/my'
+      preLoaderRoute: typeof HrMyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hr/policies': {
+      id: '/hr/policies'
+      path: '/hr/policies'
+      fullPath: '/hr/policies'
+      preLoaderRoute: typeof HrPoliciesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hr/respond': {
+      id: '/hr/respond'
+      path: '/hr/respond'
+      fullPath: '/hr/respond'
+      preLoaderRoute: typeof HrRespondRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hr/sent': {
+      id: '/hr/sent'
+      path: '/hr/sent'
+      fullPath: '/hr/sent'
+      preLoaderRoute: typeof HrSentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hr/templates': {
+      id: '/hr/templates'
+      path: '/hr/templates'
+      fullPath: '/hr/templates'
+      preLoaderRoute: typeof HrTemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marketing/$section': {
       id: '/marketing/$section'
       path: '/marketing/$section'
@@ -192,6 +390,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PeoplePersonIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hr/cases/': {
+      id: '/hr/cases/'
+      path: '/hr/cases'
+      fullPath: '/hr/cases/'
+      preLoaderRoute: typeof HrCasesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hr/cases/$caseId': {
+      id: '/hr/cases/$caseId'
+      path: '/hr/cases/$caseId'
+      fullPath: '/hr/cases/$caseId'
+      preLoaderRoute: typeof HrCasesCaseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hr/people/': {
+      id: '/hr/people/'
+      path: '/hr/people'
+      fullPath: '/hr/people/'
+      preLoaderRoute: typeof HrPeopleIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hr/people/$staffId': {
+      id: '/hr/people/$staffId'
+      path: '/hr/people/$staffId'
+      fullPath: '/hr/people/$staffId'
+      preLoaderRoute: typeof HrPeopleStaffIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hr/team/': {
+      id: '/hr/team/'
+      path: '/hr/team'
+      fullPath: '/hr/team/'
+      preLoaderRoute: typeof HrTeamIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hr/team/$staffId': {
+      id: '/hr/team/$staffId'
+      path: '/hr/team/$staffId'
+      fullPath: '/hr/team/$staffId'
+      preLoaderRoute: typeof HrTeamStaffIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -200,10 +440,22 @@ const rootRouteChildren: RootRouteChildren = {
   SectionRoute: SectionRoute,
   AdminSectionRoute: AdminSectionRoute,
   CompaniesCompanyIdRoute: CompaniesCompanyIdRoute,
+  HrApprovalsRoute: HrApprovalsRoute,
+  HrMyRoute: HrMyRoute,
+  HrPoliciesRoute: HrPoliciesRoute,
+  HrRespondRoute: HrRespondRoute,
+  HrSentRoute: HrSentRoute,
+  HrTemplatesRoute: HrTemplatesRoute,
   MarketingSectionRoute: MarketingSectionRoute,
   PeoplePersonIdRoute: PeoplePersonIdRoute,
   CompaniesIndexRoute: CompaniesIndexRoute,
   PeopleIndexRoute: PeopleIndexRoute,
+  HrCasesCaseIdRoute: HrCasesCaseIdRoute,
+  HrPeopleStaffIdRoute: HrPeopleStaffIdRoute,
+  HrTeamStaffIdRoute: HrTeamStaffIdRoute,
+  HrCasesIndexRoute: HrCasesIndexRoute,
+  HrPeopleIndexRoute: HrPeopleIndexRoute,
+  HrTeamIndexRoute: HrTeamIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

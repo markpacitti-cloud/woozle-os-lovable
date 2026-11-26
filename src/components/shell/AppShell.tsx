@@ -4,8 +4,10 @@ import { Link, useLocation, useMatch, useNavigate } from "@tanstack/react-router
 import {
   Activity,
   Building2,
+  BookOpen,
   Calendar,
   CheckSquare,
+  ClipboardList,
   ChevronDown,
   ChevronsLeft,
   ChevronsRight,
@@ -23,6 +25,7 @@ import {
   Send,
   Settings,
   Share2,
+  ShieldCheck,
   Sparkles,
   UserCheck,
   Users,
@@ -95,6 +98,12 @@ function NavIcon({ name, className }: { name: NavItemConfig["icon"]; className?:
       return <Mail className={cls} />;
     case "activity":
       return <Activity className={cls} />;
+    case "library":
+      return <BookOpen className={cls} />;
+    case "clipboard":
+      return <ClipboardList className={cls} />;
+    case "shield":
+      return <ShieldCheck className={cls} />;
   }
 }
 
@@ -169,6 +178,38 @@ export function AppShell({ children }: { children: ReactNode }) {
       void navigate({ to: "/people" });
       return;
     }
+    if (path === "/hr/my") {
+      void navigate({ to: "/hr/my", search: {} });
+      return;
+    }
+    if (path === "/hr/policies") {
+      void navigate({ to: "/hr/policies" });
+      return;
+    }
+    if (path === "/hr/team") {
+      void navigate({ to: "/hr/team" });
+      return;
+    }
+    if (path === "/hr/people") {
+      void navigate({ to: "/hr/people" });
+      return;
+    }
+    if (path === "/hr/cases") {
+      void navigate({ to: "/hr/cases" });
+      return;
+    }
+    if (path === "/hr/sent") {
+      void navigate({ to: "/hr/sent" });
+      return;
+    }
+    if (path === "/hr/templates") {
+      void navigate({ to: "/hr/templates" });
+      return;
+    }
+    if (path === "/hr/approvals") {
+      void navigate({ to: "/hr/approvals" });
+      return;
+    }
     if (path.startsWith("/marketing/")) {
       void navigate({
         to: "/marketing/$section",
@@ -193,11 +234,17 @@ export function AppShell({ children }: { children: ReactNode }) {
     if (path === "/people") {
       return location.pathname === "/people" || location.pathname.startsWith("/people/");
     }
+    if (["/hr/team", "/hr/people", "/hr/cases"].includes(path)) {
+      return location.pathname === path || location.pathname.startsWith(`${path}/`);
+    }
     return location.pathname === path;
   };
 
   const renderNavList = (collapsed: boolean) => (
-    <nav className="flex-1 space-y-4 overflow-y-auto px-2 py-3" aria-label={`${currentSpace.label} navigation`}>
+    <nav
+      className="flex-1 space-y-4 overflow-y-auto px-2 py-3"
+      aria-label={`${currentSpace.label} navigation`}
+    >
       {navGroups.map((group) => (
         <div key={group.label}>
           {!collapsed ? (
@@ -307,7 +354,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-52">
-                <DropdownMenuLabel className="text-xs text-muted-foreground">Spaces</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-xs text-muted-foreground">
+                  Spaces
+                </DropdownMenuLabel>
                 {availableSpaces.map((space) => (
                   <DropdownMenuItem
                     key={space.id}
@@ -327,7 +376,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                 ))}
                 <DropdownMenuSeparator />
                 {COMING_SOON_SPACES.map((label) => (
-                  <DropdownMenuItem key={label} disabled className="flex items-center justify-between">
+                  <DropdownMenuItem
+                    key={label}
+                    disabled
+                    className="flex items-center justify-between"
+                  >
                     <span className="text-sm">{label}</span>
                     <span className="text-[11px] text-muted-foreground">Coming soon</span>
                   </DropdownMenuItem>
@@ -370,21 +423,23 @@ export function AppShell({ children }: { children: ReactNode }) {
               </kbd>
             </button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 gap-1.5 px-2.5 text-xs"
-              onClick={() => {
-                if (typeof window !== "undefined" && window.innerWidth < 1280) {
-                  setMobileChatOpen((prev) => !prev);
-                } else {
-                  setChatOpen((prev) => !prev);
-                }
-              }}
-            >
-              <Sparkles className="h-3.5 w-3.5 text-link" />
-              <span className="hidden sm:inline">Ask Woozle</span>
-            </Button>
+            {currentSpaceId !== "hr" ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5 px-2.5 text-xs"
+                onClick={() => {
+                  if (typeof window !== "undefined" && window.innerWidth < 1280) {
+                    setMobileChatOpen((prev) => !prev);
+                  } else {
+                    setChatOpen((prev) => !prev);
+                  }
+                }}
+              >
+                <Sparkles className="h-3.5 w-3.5 text-link" />
+                <span className="hidden sm:inline">Ask Woozle</span>
+              </Button>
+            ) : null}
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -487,7 +542,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <main className="min-w-0 flex-1 overflow-y-auto bg-background">{children}</main>
 
-          {chatOpen ? (
+          {chatOpen && currentSpaceId !== "hr" ? (
             <div className="hidden w-[360px] shrink-0 border-l border-border xl:block">
               <AskWoozlePanel
                 space={currentSpaceId}
@@ -500,19 +555,21 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           ) : null}
 
-          <Sheet open={mobileChatOpen} onOpenChange={setMobileChatOpen}>
-            <SheetContent side="right" className="w-full p-0 sm:max-w-[380px] [&>button]:hidden">
-              <SheetTitle className="sr-only">Ask Woozle</SheetTitle>
-              <AskWoozlePanel
-                space={currentSpaceId}
-                companyId={companyId}
-                companyName={cachedCompany?.name}
-                personId={personId}
-                personName={cachedPerson?.full_name}
-                onClose={() => setMobileChatOpen(false)}
-              />
-            </SheetContent>
-          </Sheet>
+          {currentSpaceId !== "hr" ? (
+            <Sheet open={mobileChatOpen} onOpenChange={setMobileChatOpen}>
+              <SheetContent side="right" className="w-full p-0 sm:max-w-[380px] [&>button]:hidden">
+                <SheetTitle className="sr-only">Ask Woozle</SheetTitle>
+                <AskWoozlePanel
+                  space={currentSpaceId}
+                  companyId={companyId}
+                  companyName={cachedCompany?.name}
+                  personId={personId}
+                  personName={cachedPerson?.full_name}
+                  onClose={() => setMobileChatOpen(false)}
+                />
+              </SheetContent>
+            </Sheet>
+          ) : null}
         </div>
 
         <GlobalSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />

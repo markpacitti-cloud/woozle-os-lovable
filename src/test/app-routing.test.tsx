@@ -15,6 +15,18 @@ describe("App routing", () => {
     expect(matches.at(-1)?.routeId).not.toBe(rootRouteId);
   });
 
+  it("matches HR pages and the public response route", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+    const id = "11111111-1111-1111-1111-111111111111";
+
+    expect(router.matchRoutes("/hr/my").at(-1)?.routeId).toBe("/hr/my");
+    expect(router.matchRoutes("/hr/policies").at(-1)?.routeId).toBe("/hr/policies");
+    expect(router.matchRoutes(`/hr/team/${id}`).at(-1)?.routeId).toBe("/hr/team/$staffId");
+    expect(router.matchRoutes(`/hr/people/${id}`).at(-1)?.routeId).toBe("/hr/people/$staffId");
+    expect(router.matchRoutes(`/hr/cases/${id}`).at(-1)?.routeId).toBe("/hr/cases/$caseId");
+    expect(router.matchRoutes("/hr/respond").at(-1)?.routeId).toBe("/hr/respond");
+  });
+
   it("matches dedicated routes for /people and /people/$personId", () => {
     const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
 

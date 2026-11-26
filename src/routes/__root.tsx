@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -16,6 +17,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { isPublicHrResponsePath } from "@/lib/hr";
 
 function NotFoundComponent() {
   return (
@@ -125,17 +127,23 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useLocation();
+  const publicHrResponse = isPublicHrResponsePath(location.pathname);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AuthGate>
-          <AppShell>
-            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-            <Outlet />
-          </AppShell>
-        </AuthGate>
-      </AuthProvider>
+      {publicHrResponse ? (
+        <Outlet />
+      ) : (
+        <AuthProvider>
+          <AuthGate>
+            <AppShell>
+              {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+              <Outlet />
+            </AppShell>
+          </AuthGate>
+        </AuthProvider>
+      )}
       <Toaster position="bottom-right" />
     </QueryClientProvider>
   );
